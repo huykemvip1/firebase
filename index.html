@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Thông báo (<span id="notify"></span>)</h1>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getMessaging, onMessage, getToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
+
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        const firebaseConfig = {
+            apiKey: "AIzaSyDzDlUanuT-n9vuEw6PMtGjCFHpP99jVqs",
+            authDomain: "wihcloud-app.firebaseapp.com",
+            projectId: "wihcloud-app",
+            storageBucket: "wihcloud-app.firebasestorage.app",
+            messagingSenderId: "380864257222",
+            appId: "1:380864257222:web:22d6ca27aa449474d74bc7",
+            measurementId: "G-82HKJQ6F87"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+
+        const messaging = getMessaging(app);
+
+        navigator.serviceWorker.register("/firebase-messaging-sw.js").then(registration => {
+        });
+
+        // Get FCM token
+        getToken(messaging, {
+            vapidKey: 'BN2UDnsNUbQrDpVswH3NJ2CxDJpY0BuDg35FsFmS7XcwULnQPDZrpnV_lj_PR6VkJnwXzRmoV5t-mXFiOTus2Cg'
+        }).then((currentToken) => {
+            if (currentToken) {
+                console.log("FCM Token:", currentToken);
+            } else {
+                console.log("No token available.");
+            }
+        }).catch((err) => {
+            console.error("Error getting FCM token:", err);
+        });
+
+
+
+
+        // Handle foreground notifications
+        onMessage(messaging, (payload) => {
+            document.getElementById('notify').textContent = "Notification Title: " + payload.notification.title + "\nMessage: " + payload.notification.body;
+            console.log("Notification received in foreground:", payload);
+            // Use jQuery to display an alert-like message
+            alert("Notification Title: " + payload.notification.title + "\nMessage: " + payload.notification.body);
+        });
+
+    </script>
+</body>
+
+</html>
