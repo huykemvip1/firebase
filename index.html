@@ -11,7 +11,7 @@
     <h1>Thông báo (<span id="notify"></span>)</h1>
     <h1>Token: (<span id="token"></span>)</h1>
     <button id="request" type="button">Request Permission</button>
-    
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getMessaging, onMessage, getToken, isSupported } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
@@ -27,42 +27,35 @@
             measurementId: "G-82HKJQ6F87"
         };
 
+        document.getElementById('request').addEventListener('click', requestPermission);
         // Initialize Firebase
         const app = initializeApp(firebaseConfig);
 
         const messaging = getMessaging(app);
 
         navigator.serviceWorker.register("/firebase-messaging-sw.js").then(registration => {
+            console.log(registration);
         });
 
         function requestPermission() {
-            return Notification.requestPermission(function (result) {
-                console.log("Permission granted");
-                return result;
+            return Notification.requestPermission().then(permission => {
+                if (permission === "granted") {
+                    // Get FCM token
+                    getToken(messaging, {
+                        vapidKey: 'BN2UDnsNUbQrDpVswH3NJ2CxDJpY0BuDg35FsFmS7XcwULnQPDZrpnV_lj_PR6VkJnwXzRmoV5t-mXFiOTus2Cg'
+                    }).then((currentToken) => {
+                        if (currentToken) {
+                            document.getElementById('token').textContent = currentToken;
+                            console.log("FCM Token:", currentToken);
+                        } else {
+                            console.log("No token available.");
+                        }
+                    }).catch((err) => {
+                        console.error("Error getting FCM token:", err);
+                    });
+                }
             });
         }
-
-         isSupported().then((supported) => {
-            console.log(supported);
-            document.getElementById('notify').textContent = supported;
-        })
-
-        // Get FCM token
-        getToken(messaging, {
-            vapidKey: 'BN2UDnsNUbQrDpVswH3NJ2CxDJpY0BuDg35FsFmS7XcwULnQPDZrpnV_lj_PR6VkJnwXzRmoV5t-mXFiOTus2Cg'
-        }).then((currentToken) => {
-            if (currentToken) {
-                document.getElementById('token').textContent = currentToken;
-                console.log("FCM Token:", currentToken);
-            } else {
-                console.log("No token available.");
-            }
-        }).catch((err) => {
-            console.error("Error getting FCM token:", err);
-        });
-
-
-
 
         // Handle foreground notifications
         onMessage(messaging, (payload) => {
