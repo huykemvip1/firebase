@@ -9,6 +9,9 @@
 
 <body>
     <h1>Thông báo (<span id="notify"></span>)</h1>
+    <h1>Token: (<span id="token"></span>)</h1>
+    <button id="request" type="button">Request Permission</button>
+    
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import { getMessaging, onMessage, getToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js";
@@ -32,11 +35,19 @@
         navigator.serviceWorker.register("/firebase-messaging-sw.js").then(registration => {
         });
 
+        function requestPermission() {
+            return Notification.requestPermission(function (result) {
+                console.log("Permission granted");
+                return result;
+            });
+        }
+
         // Get FCM token
         getToken(messaging, {
             vapidKey: 'BN2UDnsNUbQrDpVswH3NJ2CxDJpY0BuDg35FsFmS7XcwULnQPDZrpnV_lj_PR6VkJnwXzRmoV5t-mXFiOTus2Cg'
         }).then((currentToken) => {
             if (currentToken) {
+                document.getElementById('token').textContent = currentToken;
                 console.log("FCM Token:", currentToken);
             } else {
                 console.log("No token available.");
